@@ -24,12 +24,10 @@
   --muted:#8a8ca0;
   --card:#f5f6f9;
   --line:#eef0f4;
-  --accent:#1E9E5A;
-  --accent-ink:#137446;
-  --accent-soft:#8FD3AE;
-  --accent-tint:#E6F6ED;
-  --accent-tint-border:#B5E3CA;
-  --lemon:#FFE36E;
+  --accent:#FFD21F;       /* lemon yellow: fills only, always with dark ink on top */
+  --accent-ink:#7A5800;   /* dark amber: yellow-family text/icons on white (7:1) */
+  --accent-tint:#FFF7D6;
+  --accent-tint-border:#F2DA7A;
   --danger:#e5484d;
   --sans:'Figtree',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 }
@@ -52,7 +50,7 @@ body{
 .topbar .sub{font-size:17px;font-weight:500;color:var(--muted);margin-top:2px;min-height:22px}
 
 button:focus-visible,input:focus-visible,[role="button"]:focus-visible{
-  outline:3px solid var(--accent);outline-offset:2px}
+  outline:3px solid var(--accent-ink);outline-offset:2px}
 
 .add-row{display:flex;align-items:center;gap:10px;min-height:64px;margin-top:8px;
   border-bottom:1px solid var(--line);color:var(--accent-ink);
@@ -60,7 +58,7 @@ button:focus-visible,input:focus-visible,[role="button"]:focus-visible{
 .add-row .plus{flex-shrink:0;width:48px;height:48px;margin-left:-10px;
   display:flex;align-items:center;justify-content:center}
 .add-row .plus span{width:31px;height:31px;border-radius:50%;background:var(--accent);
-  color:#fff;display:flex;align-items:center;justify-content:center}
+  color:var(--ink);display:flex;align-items:center;justify-content:center}
 .add-row input{flex:1;border:none;outline:none;background:transparent;font-family:var(--sans);
   font-size:21px;font-weight:500;color:var(--ink);padding:0;min-width:0;height:48px}
 .add-row input::placeholder{color:var(--muted)}
@@ -97,7 +95,7 @@ li.item.checked .t-label{background-size:100% 2px}
 .more{flex-shrink:0;width:48px;height:48px;margin-right:-10px;border:none;background:none;
   color:#aeb1c4;cursor:pointer;border-radius:50%;
   display:flex;align-items:center;justify-content:center}
-.more:active{color:var(--accent)}
+.more:active{color:var(--accent-ink)}
 
 li.section{list-style:none;display:flex;align-items:flex-end;justify-content:space-between;
   font-size:16px;font-weight:600;color:var(--muted);
@@ -114,7 +112,7 @@ li.section{list-style:none;display:flex;align-items:flex-end;justify-content:spa
   padding:0 16px calc(16px + env(safe-area-inset-bottom))}
 .clear-btn{pointer-events:auto;display:flex;align-items:center;justify-content:center;gap:10px;
   width:100%;max-width:528px;margin:0 auto;min-height:60px;border:none;border-radius:18px;
-  background:var(--accent-ink);color:#fff;font-family:var(--sans);font-size:19px;font-weight:700;
+  background:var(--accent);color:var(--ink);font-family:var(--sans);font-size:19px;font-weight:700;
   cursor:pointer;transform:translateY(0);opacity:1;
   transition:transform .3s cubic-bezier(.32,.72,.28,1),opacity .2s ease}
 .clear-btn:active{filter:brightness(.9)}
@@ -155,7 +153,7 @@ li.section{list-style:none;display:flex;align-items:flex-end;justify-content:spa
 .sheet-group button{display:flex;align-items:center;justify-content:center;gap:10px;
   width:100%;font-family:var(--sans);font-size:20px;font-weight:500;color:var(--ink);
   background:none;border:none;cursor:pointer;min-height:62px;border-bottom:1px solid var(--line)}
-.sheet-group button svg{color:var(--accent)}
+.sheet-group button svg{color:var(--accent-ink)}
 .sheet-group button:last-child{border-bottom:none}
 .sheet-group button:active{background:var(--card)}
 .sheet-group button.danger{color:var(--danger)}
@@ -167,16 +165,20 @@ li.section{list-style:none;display:flex;align-items:flex-end;justify-content:spa
 .sheet-cancel button:active{background:var(--card)}
 
 /* ---- celebration: raining lemons ---- */
-#celebrate{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;
+#celebrate{position:fixed;inset:0;background-color:var(--bg);
+  /* soft yellow gingham tablecloth */
+  background-image:linear-gradient(rgba(255,216,77,.28) 50%,transparent 50%),
+                   linear-gradient(90deg,rgba(255,216,77,.28) 50%,transparent 50%);
+  background-size:64px 64px;z-index:200;display:none;
   overflow:hidden;opacity:1;transition:opacity .5s ease}
 #celebrate.show{display:block}
 #celebrate.fade{opacity:0}
-#celebrate .msg{position:absolute;left:0;right:0;top:40%;text-align:center;
+#celebrate .msg{position:absolute;left:16px;right:16px;top:40%;background:var(--bg);border-radius:22px;padding-top:22px;padding-bottom:22px;max-width:420px;margin:0 auto;z-index:1;text-align:center;
   font-size:30px;font-weight:700;color:var(--ink);padding:0 24px;line-height:1.3;
   animation:msgIn .5s ease}
 #celebrate .msg small{display:block;font-size:19px;font-weight:500;color:var(--muted);margin-top:8px}
 @keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.drop{position:absolute;top:0;color:var(--accent);
+.drop{position:absolute;top:0;
   animation:drop 2.4s cubic-bezier(.45,0,.7,1) forwards}
 @keyframes drop{from{transform:translateY(-120px) rotate(0)}to{transform:translateY(110vh) rotate(260deg)}}
 
@@ -204,13 +206,7 @@ li.section{list-style:none;display:flex;align-items:flex-end;justify-content:spa
   <ul class="items" id="list"></ul>
 
   <div class="empty" id="empty" hidden>
-    <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#1E9E5A" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <g transform="translate(-0.9 1.2) rotate(-32 12 12.5)">
-        <path d="M2.5 12.5C4.5 11.6 5.6 6.8 12 6.8S19.5 11.6 21.5 12.5C19.5 13.4 18.4 18.2 12 18.2S4.5 13.4 2.5 12.5z" fill="#FFF6C9"/>
-        <path d="M8.2 10.6c1-1 2.3-1.5 3.8-1.6" opacity=".55"/>
-      </g>
-      <path d="M19.3 8.1c-.5-2 .5-3.9 2.4-4.7.6 2 -.4 3.9-2.4 4.7z" fill="#E6F6ED"/>
-    </svg>
+    <svg width="140" height="140" viewBox="-1 -1 26 26" aria-hidden="true"><g transform="rotate(-14 12 12.5)"><path d="M2.7 12.5C2.7 11.7 3.5 11.2 4.5 11C5.7 7.9 8.5 6 12 6S18.3 7.9 19.5 11C20.5 11.2 21.3 11.7 21.3 12.5S20.5 13.8 19.5 14C18.3 17.1 15.5 19 12 19S5.7 17.1 4.5 14C3.5 13.8 2.7 13.3 2.7 12.5z" fill="#D9A21B" opacity=".45" transform="translate(.9 1)"/><path d="M2.7 12.5C2.7 11.7 3.5 11.2 4.5 11C5.7 7.9 8.5 6 12 6S18.3 7.9 19.5 11C20.5 11.2 21.3 11.7 21.3 12.5S20.5 13.8 19.5 14C18.3 17.1 15.5 19 12 19S5.7 17.1 4.5 14C3.5 13.8 2.7 13.3 2.7 12.5z" fill="#FFD21F"/><path d="M6.4 11c1.3-2 3.5-3.1 6-3.2" stroke="#fff" stroke-width="1" stroke-linecap="round" fill="none" opacity=".75"/></g></svg>
     <p id="emptyMsg"></p>
   </div>
 </div>
@@ -271,10 +267,7 @@ li.section{list-style:none;display:flex;align-items:flex-end;justify-content:spa
   var celebrateEl = document.getElementById('celebrate');
   var toastTimer = null, undoSnapshot = null, sheetId = null, freshId = null, popId = null;
 
-  var LEMON = '<svg width="__S__" height="__S__" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">' +
-    '<g transform="translate(-0.9 1.2) rotate(-32 12 12.5)"><path d="M2.5 12.5C4.5 11.6 5.6 6.8 12 6.8S19.5 11.6 21.5 12.5C19.5 13.4 18.4 18.2 12 18.2S4.5 13.4 2.5 12.5z" fill="__F__"/>' +
-    '<path d="M8.2 10.6c1-1 2.3-1.5 3.8-1.6" opacity=".55"/></g>' +
-    '<path d="M19.3 8.1c-.5-2 .5-3.9 2.4-4.7.6 2 -.4 3.9-2.4 4.7z"/></svg>';
+  var LEMON = '<svg width="__S__" height="__S__" viewBox="-1 -1 26 26"><g transform="rotate(-14 12 12.5)"><path d="M2.7 12.5C2.7 11.7 3.5 11.2 4.5 11C5.7 7.9 8.5 6 12 6S18.3 7.9 19.5 11C20.5 11.2 21.3 11.7 21.3 12.5S20.5 13.8 19.5 14C18.3 17.1 15.5 19 12 19S5.7 17.1 4.5 14C3.5 13.8 2.7 13.3 2.7 12.5z" fill="#D9A21B" opacity=".45" transform="translate(.9 1)"/><path d="M2.7 12.5C2.7 11.7 3.5 11.2 4.5 11C5.7 7.9 8.5 6 12 6S18.3 7.9 19.5 11C20.5 11.2 21.3 11.7 21.3 12.5S20.5 13.8 19.5 14C18.3 17.1 15.5 19 12 19S5.7 17.1 4.5 14C3.5 13.8 2.7 13.3 2.7 12.5z" fill="#FFD21F"/><path d="M6.4 11c1.3-2 3.5-3.1 6-3.2" stroke="#fff" stroke-width="1" stroke-linecap="round" fill="none" opacity=".75"/></g></svg>';
 
   var EMPTY_MSGS = [
     'Liste bomboş. Ya dolap dolu, ya da bir şey unutuluyor.',
@@ -327,7 +320,7 @@ li.section{list-style:none;display:flex;align-items:flex-end;justify-content:spa
 
   /* ---- rendering ---- */
   var CHECK = '<span class="ring"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">' +
-    '<path d="M3 8.5l3.2 3.2L13 5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+    '<path d="M3 8.5l3.2 3.2L13 5" stroke="#040317" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
 
   function makeItem(item) {
     var li = document.createElement('li');
@@ -570,7 +563,7 @@ li.section{list-style:none;display:flex;align-items:flex-end;justify-content:spa
       el.style.marginLeft = (-size / 2) + 'px';
       el.style.animationDelay = (Math.random() * 1.1).toFixed(2) + 's';
       el.style.animationDuration = (2 + Math.random() * 1.2).toFixed(2) + 's';
-      el.innerHTML = LEMON.replace(/__S__/g, String(size)).replace('__F__', k % 3 ? '#FFE36E' : '#E6F6ED');
+      el.innerHTML = LEMON.replace(/__S__/g, String(size));
       celebrateEl.appendChild(el);
     }
     celebrateEl.classList.add('show');
