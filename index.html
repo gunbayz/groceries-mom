@@ -5,11 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Bakkal</title>
 <meta name="description" content="Pazar, market, bakkal — ne lazımsa listesi">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#2C54B5">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="favicon.ico" sizes="48x48">
 <link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -28,6 +29,10 @@
   --accent-ink:#7A5800;   /* dark amber: yellow-family text/icons on white (7:1) */
   --accent-tint:#FFF7D6;
   --accent-tint-border:#F2DA7A;
+  --success:#22A060;      /* green = done / success */
+  --success-ink:#12703F;
+  --success-tint:#E8F6EE;
+  --success-border:#B7E2C8;
   --danger:#e5484d;
   --sans:'Figtree',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 }
@@ -45,7 +50,14 @@ body{
 /* ---- sticky header: title + add row ---- */
 .head{position:sticky;top:0;z-index:20;background:var(--bg);
   padding-top:calc(12px + env(safe-area-inset-top))}
-.topbar{text-align:center;padding:6px 0 4px}
+.topbar{position:relative;text-align:center;padding:6px 0 4px}
+.top-clear{position:absolute;top:-2px;right:-6px;width:48px;height:48px;border:none;background:none;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.top-clear[hidden]{display:none}
+.top-clear span{width:40px;height:40px;border-radius:50%;background:var(--accent-tint);
+  border:1.5px solid var(--accent-tint-border);color:var(--accent-ink);
+  display:flex;align-items:center;justify-content:center;transition:background .15s ease}
+.top-clear:active span{background:var(--accent)}
 .topbar h1{font-size:27px;font-weight:700;line-height:1.2;letter-spacing:.04em}
 .topbar .sub{font-size:17px;font-weight:500;color:var(--muted);margin-top:2px;min-height:22px}
 
@@ -76,7 +88,7 @@ li.item.enter{animation:fadeIn .28s ease}
 .check .ring{width:31px;height:31px;border-radius:50%;border:2px solid #cfd2de;
   background:var(--bg);display:flex;align-items:center;justify-content:center;
   transition:background .18s ease,border-color .18s ease}
-li.item.checked .ring{background:var(--accent);border-color:var(--accent)}
+li.item.checked .ring{background:var(--success);border-color:var(--success)}
 .ring svg{opacity:0;transform:scale(.5);transition:opacity .18s ease,transform .18s ease}
 li.item.checked .ring svg{opacity:1;transform:scale(1)}
 li.item.pop .ring{animation:pop .3s ease}
@@ -97,9 +109,18 @@ li.item.checked .t-label{background-size:100% 2px}
   display:flex;align-items:center;justify-content:center}
 .more:active{color:var(--accent-ink)}
 
-li.section{list-style:none;display:flex;align-items:flex-end;justify-content:space-between;
-  font-size:16px;font-weight:600;color:var(--muted);
-  padding:26px 0 10px;border-bottom:1px solid var(--line)}
+li.section{list-style:none;display:flex;align-items:center;justify-content:space-between;
+  font-size:17px;font-weight:700;color:var(--success-ink);
+  padding:18px 0 4px;border-bottom:1px solid var(--line)}
+li.section .count{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;
+  padding:0 8px;margin-left:8px;border-radius:13px;background:var(--success-tint);
+  color:var(--success-ink);font-size:15px;font-weight:700}
+.sec-clear{width:48px;height:48px;margin-right:-6px;border:none;background:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;border-radius:50%}
+.sec-clear span{width:40px;height:40px;border-radius:50%;background:var(--accent-tint);
+  border:1.5px solid var(--accent-tint-border);color:var(--accent-ink);
+  display:flex;align-items:center;justify-content:center;transition:background .15s ease}
+.sec-clear:active span{background:var(--accent)}
 
 /* ---- empty state ---- */
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -107,35 +128,41 @@ li.section{list-style:none;display:flex;align-items:flex-end;justify-content:spa
 .empty[hidden]{display:none}
 .empty p{font-size:20px;font-weight:500;color:var(--muted);line-height:1.45;max-width:300px}
 
-/* ---- bottom clear button ---- */
-.clear-wrap{position:fixed;left:0;right:0;bottom:0;z-index:30;pointer-events:none;
-  padding:0 16px calc(16px + env(safe-area-inset-bottom))}
-.clear-btn{pointer-events:auto;display:flex;align-items:center;justify-content:center;gap:10px;
-  width:100%;max-width:528px;margin:0 auto;min-height:60px;border:none;border-radius:18px;
-  background:var(--accent);color:var(--ink);font-family:var(--sans);font-size:19px;font-weight:700;
-  cursor:pointer;transform:translateY(0);opacity:1;
-  transition:transform .3s cubic-bezier(.32,.72,.28,1),opacity .2s ease}
-.clear-btn:active{filter:brightness(.9)}
-.sheet-open .clear-wrap{opacity:0;transition:opacity .2s ease}
-.clear-btn[hidden]{display:flex;transform:translateY(140%);opacity:0;pointer-events:none}
-
 /* ---- toast ---- */
-.toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));
   transform:translate(-50%,16px);width:calc(100% - 32px);max-width:528px;
-  background:var(--accent-tint);color:var(--accent-ink);
-  border:1.5px solid var(--accent-tint-border);
+  background:var(--success-tint);color:var(--success-ink);
+  border:1.5px solid var(--success-border);
   font-size:18px;font-weight:600;line-height:1.4;
   padding:10px 10px 10px 20px;min-height:60px;border-radius:18px;opacity:0;pointer-events:none;
   display:flex;align-items:center;gap:10px;
   transition:opacity .26s cubic-bezier(.4,0,.2,1),transform .26s cubic-bezier(.4,0,.2,1);
   z-index:50}
-.toast.low{bottom:calc(16px + env(safe-area-inset-bottom))}
 .toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 .toast .msg{flex:1;padding:6px 0}
 .toast button{flex-shrink:0;font-family:var(--sans);font-size:18px;font-weight:700;
-  color:var(--accent-ink);background:var(--bg);border:1.5px solid var(--accent-tint-border);
+  color:var(--success-ink);background:var(--bg);border:1.5px solid var(--success-border);
   border-radius:12px;min-height:48px;padding:0 16px;cursor:pointer}
 .toast button[hidden]{display:none}
+
+/* ---- confirm alert ---- */
+.overlay{position:fixed;inset:0;background:rgba(4,3,23,.34);display:none;
+  align-items:center;justify-content:center;padding:24px;z-index:100}
+.overlay.show{display:flex}
+.alert{background:var(--bg);border-radius:22px;max-width:340px;width:100%;overflow:hidden;
+  animation:alertIn .2s ease}
+@keyframes alertIn{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.alert-body{padding:26px 22px 20px;text-align:center}
+.alert-body .a-icon{width:60px;height:60px;margin:0 auto 12px;border-radius:50%;
+  background:var(--accent);color:var(--ink);display:flex;align-items:center;justify-content:center}
+.alert-body h2{font-size:22px;font-weight:700;margin-bottom:8px}
+.alert-body p{font-size:18px;font-weight:500;color:var(--muted);line-height:1.45}
+.alert-actions{display:flex;border-top:1px solid var(--line)}
+.alert-actions button{flex:1;font-family:var(--sans);font-size:19px;min-height:60px;
+  border:none;background:none;cursor:pointer}
+.alert-actions button:first-child{border-right:1px solid var(--line);font-weight:600;color:var(--ink)}
+.alert-actions button:last-child{color:var(--danger);font-weight:700}
+.alert-actions button:active{background:var(--card)}
 
 /* ---- action sheet ---- */
 .sheet-scrim{position:fixed;inset:0;background:rgba(4,3,23,.34);z-index:90;
@@ -193,6 +220,7 @@ li.section{list-style:none;display:flex;align-items:flex-end;justify-content:spa
     <div class="topbar">
       <h1>Bakkal</h1>
       <p class="sub" id="sub" aria-live="polite"></p>
+      <button class="top-clear" id="clearBtn" type="button" hidden></button>
     </div>
     <div class="add-row" id="addRow">
       <span class="plus" aria-hidden="true"><span>
@@ -211,13 +239,18 @@ li.section{list-style:none;display:flex;align-items:flex-end;justify-content:spa
   </div>
 </div>
 
-<div class="clear-wrap">
-  <button class="clear-btn" id="clearBtn" hidden>
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6 7l1 13h10l1-13"/>
-    </svg>
-    <span id="clearText"></span>
-  </button>
+<div class="overlay" id="overlay" role="alertdialog" aria-modal="true" aria-labelledby="alertTitle" aria-describedby="alertDesc">
+  <div class="alert">
+    <div class="alert-body">
+      <div class="a-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v5M14 11v5"/></svg></div>
+      <h2 id="alertTitle">Sepet boşalsın mı?</h2>
+      <p id="alertDesc"></p>
+    </div>
+    <div class="alert-actions">
+      <button id="cancelClear">Vazgeç</button>
+      <button id="confirmClear">Sil gitsin</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast" role="status">
@@ -258,8 +291,9 @@ li.section{list-style:none;display:flex;align-items:flex-end;justify-content:spa
   var listEl = document.getElementById('list');
   var emptyEl = document.getElementById('empty');
   var subEl = document.getElementById('sub');
-  var addInput = document.getElementById('addInput');
   var clearBtn = document.getElementById('clearBtn');
+  var addInput = document.getElementById('addInput');
+  var overlay = document.getElementById('overlay');
   var toastEl = document.getElementById('toast');
   var undoBtn = document.getElementById('undoBtn');
   var sheet = document.getElementById('sheet');
@@ -302,7 +336,6 @@ li.section{list-style:none;display:flex;align-items:flex-end;justify-content:spa
   function toast(msg, withUndo) {
     document.getElementById('toastMsg').textContent = msg;
     undoBtn.hidden = !withUndo;
-    toastEl.classList.toggle('low', clearBtn.hidden);
     toastEl.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(hideToast, withUndo ? 5000 : 2400);
@@ -320,7 +353,7 @@ li.section{list-style:none;display:flex;align-items:flex-end;justify-content:spa
 
   /* ---- rendering ---- */
   var CHECK = '<span class="ring"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">' +
-    '<path d="M3 8.5l3.2 3.2L13 5" stroke="#040317" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+    '<path d="M3 8.5l3.2 3.2L13 5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
 
   function makeItem(item) {
     var li = document.createElement('li');
@@ -370,10 +403,16 @@ li.section{list-style:none;display:flex;align-items:flex-end;justify-content:spa
       var head = document.createElement('li');
       head.className = 'section';
       head.dataset.id = 'section';
-      head.textContent = 'Sepette';
+      var title = document.createElement('span');
+      title.innerHTML = 'Sepette<span class="count" aria-hidden="true"></span>';
+      title.querySelector('.count').textContent = done.length;
+      head.appendChild(title);
       listEl.appendChild(head);
       done.forEach(function (i) { listEl.appendChild(makeItem(i)); });
     }
+    clearBtn.hidden = !done.length;
+    clearBtn.setAttribute('aria-label', 'Sepettekileri listeden kaldır (' + done.length + ')');
+
     freshId = null; popId = null;
 
     var empty = items.length === 0;
@@ -384,10 +423,6 @@ li.section{list-style:none;display:flex;align-items:flex-end;justify-content:spa
     else if (!open.length) subEl.textContent = 'Hepsi sepette!';
     else subEl.textContent = open.length === 1 ? '1 şey kaldı' : open.length + ' şey kaldı';
 
-    clearBtn.hidden = done.length === 0;
-    toastEl.classList.toggle('low', clearBtn.hidden);
-    document.getElementById('clearText').textContent = done.length ? 'Sepettekileri kaldır (' + done.length + ')' : '';
-    clearBtn.setAttribute('aria-label', 'Alınan ' + done.length + ' şeyi listeden kaldır');
   }
 
   /* FLIP: re-render, then glide rows from their old spots */
@@ -467,7 +502,30 @@ li.section{list-style:none;display:flex;align-items:flex-end;justify-content:spa
   document.getElementById('addRow').addEventListener('click', function () { addInput.focus(); });
 
   /* ---- clear crossed-off ---- */
-  clearBtn.addEventListener('click', function () {
+  var CLEAR_ICON = '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v5M14 11v5"/></svg>';
+  clearBtn.innerHTML = '<span>' + CLEAR_ICON + '</span>';
+  clearBtn.addEventListener('click', openClearAlert);
+  var clearReturnFocus = null;
+  function openClearAlert() {
+    var n = doneItems().length;
+    if (!n) return;
+    clearReturnFocus = document.activeElement;
+    document.getElementById('alertDesc').textContent =
+      (n === 1 ? 'Alınan 1 şey' : 'Alınan ' + n + ' şey') + ' listeden silinecek. Yanlışlıkla olursa geri alabilirsin.';
+    overlay.classList.add('show');
+    document.getElementById('cancelClear').focus();
+  }
+  function closeClearAlert() {
+    overlay.classList.remove('show');
+    if (clearReturnFocus && document.body.contains(clearReturnFocus)) clearReturnFocus.focus();
+  }
+  document.getElementById('cancelClear').addEventListener('click', closeClearAlert);
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) closeClearAlert(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && overlay.classList.contains('show')) closeClearAlert();
+  });
+  document.getElementById('confirmClear').addEventListener('click', function () {
+    overlay.classList.remove('show');
     var done = doneItems();
     if (!done.length) return;
     snapshot();
@@ -491,13 +549,11 @@ li.section{list-style:none;display:flex;align-items:flex-end;justify-content:spa
     lastFocus = document.activeElement;
     document.getElementById('sheetName').textContent = item.text;
     sheet.classList.add('show');
-    document.body.classList.add('sheet-open');
     sheetScrim.classList.add('show');
     document.getElementById('actCancel').focus();
   }
   function closeSheet(restore) {
     sheet.classList.remove('show');
-    document.body.classList.remove('sheet-open');
     sheetScrim.classList.remove('show');
     if (restore && lastFocus && document.body.contains(lastFocus)) lastFocus.focus();
   }
