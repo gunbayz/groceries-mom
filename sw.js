@@ -1,4 +1,4 @@
-var CACHE = 'bakkal-v3';
+var CACHE = 'bakkal-v4';
 var ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './favicon.ico', './favicon.png', './icon-maskable-512.png'];
 
 self.addEventListener('install', function (e) {

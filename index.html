@@ -75,6 +75,16 @@ button:focus-visible,input:focus-visible,[role="button"]:focus-visible{
   font-size:21px;font-weight:500;color:var(--ink);padding:0;min-width:0;height:48px}
 .add-row input::placeholder{color:var(--muted)}
 
+/* ---- place chips ---- */
+.places{display:flex;gap:8px;padding:10px 0 4px}
+.chip{flex:1;min-height:42px;border-radius:21px;border:1.5px solid var(--line);
+  background:var(--bg);font-family:var(--sans);font-size:17px;font-weight:600;
+  color:var(--muted);cursor:pointer;
+  transition:background .15s ease,color .15s ease,border-color .15s ease}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--ink)}
+.chip:active{background:var(--card)}
+.chip[aria-pressed="true"]:active{background:var(--accent)}
+
 /* ---- rows ---- */
 ul.items{list-style:none}
 li.item{display:flex;align-items:center;gap:10px;min-height:64px;
@@ -121,6 +131,10 @@ li.section .count{display:inline-flex;align-items:center;justify-content:center;
   border:1.5px solid var(--accent-tint-border);color:var(--accent-ink);
   display:flex;align-items:center;justify-content:center;transition:background .15s ease}
 .sec-clear:active span{background:var(--accent)}
+li.section.place{color:var(--ink)}
+li.section.place .count{background:var(--accent-tint);color:var(--accent-ink)}
+li.section.place.done{color:var(--success-ink)}
+li.section.place .tick{display:inline-flex;align-items:center;margin-left:8px;color:var(--success)}
 
 /* ---- empty state ---- */
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -185,6 +199,8 @@ li.section .count{display:inline-flex;align-items:center;justify-content:center;
 .sheet-group button:active{background:var(--card)}
 .sheet-group button.danger{color:var(--danger)}
 .sheet-group button.danger svg{color:var(--danger)}
+#actMove{display:contents}
+#actMove button{border-bottom:1px solid var(--line)}
 .sheet-cancel{margin-top:10px}
 .sheet-cancel button{display:block;width:100%;font-family:var(--sans);font-size:20px;
   font-weight:700;color:var(--accent-ink);background:var(--bg);border:1.5px solid var(--line);
@@ -229,6 +245,11 @@ li.section .count{display:inline-flex;align-items:center;justify-content:center;
       <input id="addInput" type="text" enterkeyhint="done" autocapitalize="sentences" autocorrect="on"
         autocomplete="off" spellcheck="false" maxlength="80" placeholder="Ne lazım?" aria-label="Listeye ekle">
     </div>
+    <div class="places" id="placeChips" role="group" aria-label="Nereden alınacak?">
+      <button type="button" class="chip" data-place="manav" aria-pressed="false">Manav</button>
+      <button type="button" class="chip" data-place="market" aria-pressed="false">Market</button>
+      <button type="button" class="chip" data-place="ekstra" aria-pressed="false">Ekstra</button>
+    </div>
   </div>
 
   <ul class="items" id="list"></ul>
@@ -266,6 +287,7 @@ li.section .count{display:inline-flex;align-items:center;justify-content:center;
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>
       Düzelt
     </button>
+    <div id="actMove"></div>
     <button id="actDelete" class="danger">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6 7l1 13h10l1-13"/></svg>
       Sil gitsin
@@ -280,11 +302,15 @@ li.section .count{display:inline-flex;align-items:center;justify-content:center;
 (function () {
   var STORAGE_KEY = 'bakkal-v1';
   var items = [];
+  var currentPlace = 'manav';
 
   try {
     var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (saved && Array.isArray(saved.items)) {
       items = saved.items.filter(function (i) { return i && typeof i.text === 'string' && i.id; });
+      var VALID = { manav: 1, market: 1, ekstra: 1 };
+      items.forEach(function (i) { if (!VALID[i.place]) i.place = 'market'; });
+      if (saved.place && VALID[saved.place]) currentPlace = saved.place;
     }
   } catch (e) {}
 
@@ -321,13 +347,21 @@ li.section .count{display:inline-flex;align-items:center;justify-content:center;
   function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
   function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
   function save() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ items: items })); } catch (e) {}
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ items: items, place: currentPlace })); } catch (e) {}
   }
   function sentenceCase(s) { return s ? s.charAt(0).toLocaleUpperCase('tr-TR') + s.slice(1) : s; }
   function norm(s) { return s.trim().toLocaleLowerCase('tr-TR').replace(/\s+/g, ' '); }
   function reduced() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
   function openItems() { return items.filter(function (i) { return !i.checked; }); }
   function doneItems() { return items.filter(function (i) { return i.checked; }); }
+
+  var PLACES = [{ id: 'manav', label: 'Manav' }, { id: 'market', label: 'Market' }, { id: 'ekstra', label: 'Ekstra' }];
+  var PLACE_TO = { manav: 'Manav\'a', market: 'Market\'e', ekstra: 'Ekstra\'ya' };
+  function placeLabel(id) {
+    for (var k = 0; k < PLACES.length; k++) if (PLACES[k].id === id) return PLACES[k].label;
+    return 'Market';
+  }
+  function inPlace(list, id) { return list.filter(function (i) { return i.place === id; }); }
 
   addInput.placeholder = pick(PLACEHOLDERS);
   document.getElementById('emptyMsg').textContent = pick(EMPTY_MSGS);
@@ -352,6 +386,8 @@ li.section .count{display:inline-flex;align-items:center;justify-content:center;
   });
 
   /* ---- rendering ---- */
+  var TICK = '<span class="tick"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">' +
+    '<path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
   var CHECK = '<span class="ring"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">' +
     '<path d="M3 8.5l3.2 3.2L13 5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
 
@@ -363,7 +399,7 @@ li.section .count{display:inline-flex;align-items:center;justify-content:center;
     li.setAttribute('role', 'button');
     li.setAttribute('tabindex', '0');
     li.setAttribute('aria-pressed', item.checked ? 'true' : 'false');
-    li.setAttribute('aria-label', item.text + (item.checked ? ', alındı' : ''));
+    li.setAttribute('aria-label', item.text + (item.checked ? ', ' + placeLabel(item.place) + ', alındı' : ''));
 
     var check = document.createElement('span');
     check.className = 'check';
@@ -398,7 +434,29 @@ li.section .count{display:inline-flex;align-items:center;justify-content:center;
   function render() {
     var open = openItems(), done = doneItems();
     listEl.innerHTML = '';
-    open.forEach(function (i) { listEl.appendChild(makeItem(i)); });
+    PLACES.forEach(function (pl) {
+      var po = inPlace(open, pl.id), pd = inPlace(done, pl.id);
+      if (!po.length && !pd.length) return;
+      var ph = document.createElement('li');
+      ph.className = 'section place' + (po.length ? '' : ' done');
+      ph.dataset.id = 'sec-' + pl.id;
+      var pt = document.createElement('span');
+      pt.textContent = pl.label;
+      if (po.length) {
+        var c = document.createElement('span');
+        c.className = 'count';
+        c.setAttribute('aria-hidden', 'true');
+        c.textContent = po.length;
+        pt.appendChild(c);
+        ph.setAttribute('aria-label', pl.label + ', ' + po.length + ' şey kaldı');
+      } else {
+        pt.insertAdjacentHTML('beforeend', TICK);
+        ph.setAttribute('aria-label', pl.label + ', tamam');
+      }
+      ph.appendChild(pt);
+      listEl.appendChild(ph);
+      po.forEach(function (i) { listEl.appendChild(makeItem(i)); });
+    });
     if (done.length) {
       var head = document.createElement('li');
       head.className = 'section';
@@ -434,7 +492,7 @@ li.section .count{display:inline-flex;align-items:center;justify-content:center;
     var movers = [];
     Array.prototype.forEach.call(listEl.children, function (el) {
       var old = before[el.dataset.id], now = el.getBoundingClientRect().top;
-      if (old === undefined) { if (el.dataset.id === 'section') { el.style.opacity = '0'; movers.push(el); } }
+      if (old === undefined) { if (el.dataset.id && el.dataset.id.indexOf('sec') === 0) { el.style.opacity = '0'; movers.push(el); } }
       else if (Math.abs(old - now) > 0.5) { el.style.transform = 'translateY(' + (old - now) + 'px)'; el.style.zIndex = '2'; movers.push(el); }
     });
     if (!movers.length) return;
@@ -485,12 +543,13 @@ li.section .count{display:inline-flex;align-items:center;justify-content:center;
     addInput.value = '';
     if (existing) {
       if (existing.checked) { toggle(existing.id); toast(existing.text + ' tekrar listede'); }
+      else if (existing.place !== currentPlace) toast(existing.text + ' zaten ' + placeLabel(existing.place) + ' listesinde');
       else toast(pick(DUP_MSGS));
       return;
     }
     var nid = uid();
     var firstDone = items.findIndex(function (i) { return i.checked; });
-    items.splice(firstDone === -1 ? items.length : firstDone, 0, { id: nid, text: v, checked: false });
+    items.splice(firstDone === -1 ? items.length : firstDone, 0, { id: nid, text: v, checked: false, place: currentPlace });
     freshId = nid;
     save(); render();
   }
@@ -500,6 +559,20 @@ li.section .count{display:inline-flex;align-items:center;justify-content:center;
   });
   addInput.addEventListener('blur', addFromInput);
   document.getElementById('addRow').addEventListener('click', function () { addInput.focus(); });
+
+  /* ---- place chips ---- */
+  var chipEls = Array.prototype.slice.call(document.querySelectorAll('#placeChips .chip'));
+  function paintChips() {
+    chipEls.forEach(function (c) {
+      c.setAttribute('aria-pressed', c.dataset.place === currentPlace ? 'true' : 'false');
+    });
+  }
+  chipEls.forEach(function (c) {
+    // keep focus in the input so a half-typed item isn't committed to the old place
+    c.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    c.addEventListener('click', function () { currentPlace = c.dataset.place; paintChips(); save(); });
+  });
+  paintChips();
 
   /* ---- clear crossed-off ---- */
   var CLEAR_ICON = '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v5M14 11v5"/></svg>';
@@ -548,6 +621,7 @@ li.section .count{display:inline-flex;align-items:center;justify-content:center;
     sheetId = id;
     lastFocus = document.activeElement;
     document.getElementById('sheetName').textContent = item.text;
+    renderMoveButtons(item);
     sheet.classList.add('show');
     sheetScrim.classList.add('show');
     document.getElementById('actCancel').focus();
@@ -557,6 +631,31 @@ li.section .count{display:inline-flex;align-items:center;justify-content:center;
     sheetScrim.classList.remove('show');
     if (restore && lastFocus && document.body.contains(lastFocus)) lastFocus.focus();
   }
+  var MOVE_ICON = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h14"/><path d="M13 6l6 6-6 6"/></svg>';
+  function renderMoveButtons(item) {
+    var wrap = document.getElementById('actMove');
+    wrap.innerHTML = '';
+    PLACES.forEach(function (pl) {
+      if (pl.id === item.place) return;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.innerHTML = MOVE_ICON + PLACE_TO[pl.id] + ' taşı';
+      b.addEventListener('click', function () {
+        var id = sheetId;
+        closeSheet(false);
+        var it = items.find(function (x) { return x.id === id; });
+        if (!it || it.place === pl.id) return;
+        snapshot();
+        var undo = undoSnapshot;
+        it.place = pl.id;
+        save(); renderWithMotion();
+        undoSnapshot = undo;
+        toast(it.text + ' ' + PLACE_TO[pl.id] + ' taşındı', true);
+      });
+      wrap.appendChild(b);
+    });
+  }
+
   sheetScrim.addEventListener('click', function () { closeSheet(true); });
   document.getElementById('actCancel').addEventListener('click', function () { closeSheet(true); });
   document.addEventListener('keydown', function (e) {
